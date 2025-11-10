@@ -19,16 +19,46 @@ const jwtauth_guard_1 = require("../auth/guards/jwtauth.guard");
 const CreateProductDto_1 = require("./dto/CreateProductDto");
 const Product_service_1 = require("./Product.service");
 const roles_guard_1 = require("../auth/guards/roles.guard");
+const UpdateProductDto_1 = require("./dto/UpdateProductDto");
 let ProductsController = class ProductsController {
     productsService;
     constructor(productsService) {
         this.productsService = productsService;
     }
+    async getAllProducts(page, limit, search) {
+        const pageNum = page ? parseInt(page, 10) : 1;
+        const limitNum = limit ? parseInt(limit, 10) : 10;
+        if (search) {
+            return this.productsService.searchProduct(pageNum, limitNum, search);
+        }
+        else {
+            return this.productsService.getProducts(pageNum, limitNum);
+        }
+    }
     async create(dto, req) {
         return this.productsService.createProduct(dto, req.user.userId);
     }
+    async getProductById(id) {
+        return this.productsService.getProductById(id);
+    }
+    async update(id, dto) {
+        return this.productsService.updateProduct(id, dto);
+    }
+    async deleteProduct(id) {
+        return await this.productsService.deleteProduct(id);
+    }
 };
 exports.ProductsController = ProductsController;
+__decorate([
+    (0, common_1.Get)(),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, common_1.Query)('page')),
+    __param(1, (0, common_1.Query)('limit')),
+    __param(2, (0, common_1.Query)('search')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:returntype", Promise)
+], ProductsController.prototype, "getAllProducts", null);
 __decorate([
     (0, common_1.Post)(),
     (0, common_1.HttpCode)(common_1.HttpStatus.CREATED),
@@ -40,6 +70,35 @@ __decorate([
     __metadata("design:paramtypes", [CreateProductDto_1.CreateProductDto, Object]),
     __metadata("design:returntype", Promise)
 ], ProductsController.prototype, "create", null);
+__decorate([
+    (0, common_1.Get)(':id'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ProductsController.prototype, "getProductById", null);
+__decorate([
+    (0, common_1.Put)(':id'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    (0, common_1.UseGuards)(jwtauth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorators_1.Roles)('ADMIN'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, UpdateProductDto_1.UpdateProductDto]),
+    __metadata("design:returntype", Promise)
+], ProductsController.prototype, "update", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    (0, common_1.UseGuards)(jwtauth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorators_1.Roles)('ADMIN'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ProductsController.prototype, "deleteProduct", null);
 exports.ProductsController = ProductsController = __decorate([
     (0, common_1.Controller)('products'),
     __metadata("design:paramtypes", [Product_service_1.ProductsService])
