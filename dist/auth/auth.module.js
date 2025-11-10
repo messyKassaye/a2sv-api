@@ -49,6 +49,7 @@ const auth_controller_1 = require("./auth.controller");
 const user_module_1 = require("../user/user.module");
 const jwt_strategy_1 = require("./stategies/jwt.strategy");
 dotenv.config();
+const expiresIn = process.env.JWT_EXPIRES_IN ?? '15m';
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -59,7 +60,7 @@ exports.AuthModule = AuthModule = __decorate([
             passport_1.PassportModule,
             jwt_1.JwtModule.register({
                 secret: process.env.JWT_SECRET,
-                signOptions: { expiresIn: parseInt(process.env.JWT_EXPIRES_IN || '3600', 10) },
+                signOptions: { expiresIn: expiresIn },
             }),
         ],
         providers: [auth_service_1.AuthService, jwt_strategy_1.JwtStrategy],

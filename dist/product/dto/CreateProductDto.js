@@ -9,29 +9,36 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RegisterDto = void 0;
+exports.CreateProductDto = void 0;
 const class_validator_1 = require("class-validator");
-class RegisterDto {
-    username;
-    email;
-    password;
+class CreateProductDto {
+    name;
+    description;
+    price;
+    stock;
+    category;
 }
-exports.RegisterDto = RegisterDto;
+exports.CreateProductDto = CreateProductDto;
 __decorate([
     (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.Matches)(/^[a-zA-Z0-9]+$/, { message: 'Username must be alphanumeric' }),
+    (0, class_validator_1.Length)(3, 100, { message: 'Name must be between 3 and 100 characters' }),
     __metadata("design:type", String)
-], RegisterDto.prototype, "username", void 0);
+], CreateProductDto.prototype, "name", void 0);
 __decorate([
-    (0, class_validator_1.IsEmail)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.Length)(10, 1000, { message: 'Description must be at least 10 characters' }),
     __metadata("design:type", String)
-], RegisterDto.prototype, "email", void 0);
+], CreateProductDto.prototype, "description", void 0);
 __decorate([
-    (0, class_validator_1.MinLength)(8),
-    (0, class_validator_1.Matches)(/[A-Z]/, { message: 'Password must include at least one uppercase letter' }),
-    (0, class_validator_1.Matches)(/[a-z]/, { message: 'Password must include at least one lowercase letter' }),
-    (0, class_validator_1.Matches)(/[0-9]/, { message: 'Password must include at least one number' }),
-    (0, class_validator_1.Matches)(/[\W_]/, { message: 'Password must include at least one special character' }),
+    (0, class_validator_1.IsPositive)({ message: 'Price must be a positive number' }),
+    __metadata("design:type", Number)
+], CreateProductDto.prototype, "price", void 0);
+__decorate([
+    (0, class_validator_1.Min)(0, { message: 'Stock must be a non-negative integer' }),
+    __metadata("design:type", Number)
+], CreateProductDto.prototype, "stock", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
-], RegisterDto.prototype, "password", void 0);
-//# sourceMappingURL=register.dto.js.map
+], CreateProductDto.prototype, "category", void 0);
+//# sourceMappingURL=CreateProductDto.js.map

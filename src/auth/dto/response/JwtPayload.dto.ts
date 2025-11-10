@@ -5,5 +5,5 @@ export class JwtPayload {
     sub: string
 
     @IsString()
-    username: string
+    role: string
 }

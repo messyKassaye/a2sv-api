@@ -1,0 +1,1 @@
+{"version":3,"file":"ProductDto.js","sourceRoot":"","sources":["../../../src/product/dto/ProductDto.ts"],"names":[],"mappings":";;;AAAA,MAAa,UAAU;IACnB,EAAE,CAAS;IACX,IAAI,CAAS;IACb,WAAW,CAAS;IACpB,KAAK,CAAS;IACd,KAAK,CAAS;IACd,QAAQ,CAAU;IAClB,MAAM,CAAU;IAChB,SAAS,CAAO;IAChB,SAAS,CAAO;IAEhB,YAAY,OAA4B;QACpC,MAAM,CAAC,MAAM,CAAC,IAAI,EAAE,OAAO,CAAC,CAAC;IACjC,CAAC;CACJ;AAdD,gCAcC"}

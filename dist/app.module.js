@@ -18,6 +18,7 @@ const auth_module_1 = require("./auth/auth.module");
 const prisma_module_1 = require("./prisma/prisma.module");
 const user_module_1 = require("./user/user.module");
 const common_module_1 = require("./common/common.module");
+const product_module_1 = require("./product/product.module");
 const database_config_1 = __importDefault(require("./config/database.config"));
 const jwt_config_1 = __importDefault(require("./config/jwt.config"));
 let AppModule = class AppModule {
@@ -33,7 +34,8 @@ exports.AppModule = AppModule = __decorate([
             auth_module_1.AuthModule,
             prisma_module_1.PrismaModule,
             user_module_1.UserModule,
-            common_module_1.CommonModule
+            common_module_1.CommonModule,
+            product_module_1.ProductModule
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

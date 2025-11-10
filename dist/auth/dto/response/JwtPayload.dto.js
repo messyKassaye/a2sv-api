@@ -13,7 +13,7 @@ exports.JwtPayload = void 0;
 const class_validator_1 = require("class-validator");
 class JwtPayload {
     sub;
-    username;
+    role;
 }
 exports.JwtPayload = JwtPayload;
 __decorate([
@@ -23,5 +23,5 @@ __decorate([
 __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], JwtPayload.prototype, "username", void 0);
+], JwtPayload.prototype, "role", void 0);
 //# sourceMappingURL=JwtPayload.dto.js.map
