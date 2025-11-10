@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Request, HttpCode, HttpStatus, Put, Param, Get, Query, Delete } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Request, HttpCode, HttpStatus, Put, Param, Get, Query, Delete, Inject } from '@nestjs/common';
 import { Roles } from 'src/auth/decorators/roles.decorators';
 import { JwtAuthGuard } from 'src/auth/guards/jwtauth.guard';
 import { CreateProductDto } from './dto/CreateProductDto';
@@ -7,10 +7,14 @@ import { ProductDto } from './dto/ProductDto';
 import { ProductsService } from './Product.service';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { UpdateProductDto } from './dto/UpdateProductDto';
+import type { Cache } from 'cache-manager';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+
 
 @Controller('products')
 export class ProductsController {
-    constructor(private readonly productsService: ProductsService) { }
+    constructor(private readonly productsService: ProductsService, @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    ) { }
 
     @Get()
     @HttpCode(HttpStatus.OK)
@@ -20,16 +24,32 @@ export class ProductsController {
         @Query('search') search?: string,
 
     ) {
+        const cacheKey = `products_page:${page}_limit:${limit}_search:${search}`;
+
+        // Check if the response exists in cache
+        const cached = await this.cacheManager.get(cacheKey);
+        if (cached) {
+            // Return cached response if available
+            return cached;
+        }
+
         const pageNum = page ? parseInt(page, 10) : 1;
         const limitNum = limit ? parseInt(limit, 10) : 10;
 
-        if (search) {
-            return this.productsService.searchProduct(pageNum, limitNum, search)
-        } else {
-            return this.productsService.getProducts(pageNum, limitNum);
+        let result;
 
+        if (search) {
+            // If a search query is provided, fetch filtered products
+            result = await this.productsService.searchProduct(pageNum, limitNum, search);
+        } else {
+            // Otherwise, fetch all products with pagination
+            result = await this.productsService.getProducts(pageNum, limitNum);
         }
 
+        //cache the result for future requests (e.g., 60 seconds TTL)
+        await this.cacheManager.set(cacheKey, result);
+
+        return result
     }
 
     @Post()

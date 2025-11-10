@@ -20,20 +20,31 @@ const CreateProductDto_1 = require("./dto/CreateProductDto");
 const Product_service_1 = require("./Product.service");
 const roles_guard_1 = require("../auth/guards/roles.guard");
 const UpdateProductDto_1 = require("./dto/UpdateProductDto");
+const cache_manager_1 = require("@nestjs/cache-manager");
 let ProductsController = class ProductsController {
     productsService;
-    constructor(productsService) {
+    cacheManager;
+    constructor(productsService, cacheManager) {
         this.productsService = productsService;
+        this.cacheManager = cacheManager;
     }
     async getAllProducts(page, limit, search) {
+        const cacheKey = `products_page:${page}_limit:${limit}_search:${search}`;
+        const cached = await this.cacheManager.get(cacheKey);
+        if (cached) {
+            return cached;
+        }
         const pageNum = page ? parseInt(page, 10) : 1;
         const limitNum = limit ? parseInt(limit, 10) : 10;
+        let result;
         if (search) {
-            return this.productsService.searchProduct(pageNum, limitNum, search);
+            result = await this.productsService.searchProduct(pageNum, limitNum, search);
         }
         else {
-            return this.productsService.getProducts(pageNum, limitNum);
+            result = await this.productsService.getProducts(pageNum, limitNum);
         }
+        await this.cacheManager.set(cacheKey, result);
+        return result;
     }
     async create(dto, req) {
         return this.productsService.createProduct(dto, req.user.userId);
@@ -101,6 +112,7 @@ __decorate([
 ], ProductsController.prototype, "deleteProduct", null);
 exports.ProductsController = ProductsController = __decorate([
     (0, common_1.Controller)('products'),
-    __metadata("design:paramtypes", [Product_service_1.ProductsService])
+    __param(1, (0, common_1.Inject)(cache_manager_1.CACHE_MANAGER)),
+    __metadata("design:paramtypes", [Product_service_1.ProductsService, Object])
 ], ProductsController);
 //# sourceMappingURL=Product.controller.js.map

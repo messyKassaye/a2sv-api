@@ -10,6 +10,10 @@ import { ProductModule } from './product/product.module';
 import { OrdersModule } from './orders/orders.module';
 import databaseConfig from './config/database.config';
 import jwtConfig from './config/jwt.config';
+import * as redisStore from 'cache-manager-ioredis';
+import { CacheModule } from '@nestjs/cache-manager';
+
+
 
 @Module({
   imports: [
@@ -17,6 +21,7 @@ import jwtConfig from './config/jwt.config';
       isGlobal: true,
       load: [databaseConfig, jwtConfig]
     }),
+
     AuthModule,
     PrismaModule,
     UserModule,

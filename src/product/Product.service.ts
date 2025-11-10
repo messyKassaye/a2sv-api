@@ -11,6 +11,7 @@ export class ProductsService {
     constructor(private prisma: PrismaService) { }
 
     async getProducts(page = 1, limit = 10): Promise<ApiResponseDto<ProductListDto>> {
+
         const skip = (page - 1) * limit;
 
         const [totalProducts, products] = await Promise.all([
