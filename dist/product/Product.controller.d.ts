@@ -9,7 +9,7 @@ export declare class ProductsController {
     private readonly productsService;
     private cacheManager;
     constructor(productsService: ProductsService, cacheManager: Cache);
-    getAllProducts(page?: string, limit?: string, search?: string): Promise<any>;
+    getProducts(page?: string, limit?: string, search?: string): Promise<{}>;
     create(dto: CreateProductDto, req: any): Promise<ApiResponseDto<ProductDto>>;
     getProductById(id: string): Promise<ApiResponseDto<ProductDto>>;
     update(id: string, dto: UpdateProductDto): Promise<ApiResponseDto<ProductDto>>;

@@ -9,7 +9,7 @@ export class AuthController {
     constructor(private authService: AuthService) { }
 
     @Post('register')
-    @Throttle({ default: { limit: 2, ttl: 60_000 } }) // 2 requests per minute
+    @Throttle({ default: { limit: 3, ttl: 60_000 } }) // 2 requests per minute
     async register(@Body() body: RegisterDto) {
         return this.authService.register(body)
     }

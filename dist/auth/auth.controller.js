@@ -33,7 +33,7 @@ let AuthController = class AuthController {
 exports.AuthController = AuthController;
 __decorate([
     (0, common_1.Post)('register'),
-    (0, throttler_1.Throttle)({ default: { limit: 2, ttl: 60_000 } }),
+    (0, throttler_1.Throttle)({ default: { limit: 3, ttl: 60_000 } }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [register_dto_1.RegisterDto]),

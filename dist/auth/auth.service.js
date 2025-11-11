@@ -56,38 +56,39 @@ let AuthService = class AuthService {
     }
     async register(dto) {
         const { username, email, password } = dto;
-        const isUserExistByUserName = await this.prismaService.user.findUnique({
+        const existingUserByUsername = await this.prismaService.user.findUnique({
             where: {
                 username: username
             }
         });
-        if (isUserExistByUserName) {
+        if (existingUserByUsername) {
             throw new common_1.BadRequestException("Username already exist");
         }
-        const isUserExistByEmail = await this.prismaService.user.findUnique({
+        const existingUserByEmail = await this.prismaService.user.findUnique({
             where: {
                 email: email
             }
         });
-        if (isUserExistByEmail) {
+        if (existingUserByEmail) {
             throw new common_1.BadRequestException("Email already exist");
         }
         const hashedPassword = await bcrypt.hash(password, 10);
-        const { id, username: createdUsername, email: createdEmail } = await this.prismaService.user.create({
+        const registeredUser = await this.prismaService.user.create({
             data: {
-                username: dto.username,
-                email: dto.email,
+                username,
+                email,
                 password: hashedPassword,
+            },
+            select: {
+                id: true,
+                username: true,
+                email: true,
             },
         });
         return {
             success: true,
-            message: 'User registered successfull',
-            object: {
-                id: id,
-                username: createdUsername,
-                email: createdEmail,
-            },
+            message: 'User registered successfully',
+            object: registeredUser,
             errors: null
         };
     }
@@ -99,20 +100,20 @@ let AuthService = class AuthService {
         if (!user) {
             throw new common_1.UnauthorizedException("Invalid credentials");
         }
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
             throw new common_1.UnauthorizedException("Invalid credentials");
         }
         const jwtPayload = {
             sub: user.id,
             role: user.role
         };
-        const token = this.jwtService.sign(jwtPayload);
+        const accessToken = this.jwtService.sign(jwtPayload);
         return {
             success: true,
             message: 'Login successful',
             object: {
-                accessToken: token,
+                accessToken,
             },
             errors: null
         };

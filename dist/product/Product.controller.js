@@ -30,23 +30,19 @@ let ProductsController = class ProductsController {
         this.productsService = productsService;
         this.cacheManager = cacheManager;
     }
-    async getAllProducts(page, limit, search) {
+    async getProducts(page, limit, search) {
         const cacheKey = `products_page:${page}_limit:${limit}_search:${search}`;
-        const cached = await this.cacheManager.get(cacheKey);
-        if (cached) {
-            return cached;
+        const cachedResult = await this.cacheManager.get(cacheKey);
+        if (cachedResult) {
+            return cachedResult;
         }
         const pageNum = page ? parseInt(page, 10) : 1;
         const limitNum = limit ? parseInt(limit, 10) : 10;
-        let result;
-        if (search) {
-            result = await this.productsService.searchProduct(pageNum, limitNum, search);
-        }
-        else {
-            result = await this.productsService.getProducts(pageNum, limitNum);
-        }
-        await this.cacheManager.set(cacheKey, result);
-        return result;
+        const products = search
+            ? await this.productsService.searchProduct(pageNum, limitNum, search)
+            : await this.productsService.getProducts(pageNum, limitNum);
+        await this.cacheManager.set(cacheKey, products);
+        return products;
     }
     async create(dto, req) {
         return this.productsService.createProduct(dto, req.user.userId);
@@ -74,7 +70,7 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", Promise)
-], ProductsController.prototype, "getAllProducts", null);
+], ProductsController.prototype, "getProducts", null);
 __decorate([
     (0, common_1.Post)(),
     (0, common_1.HttpCode)(common_1.HttpStatus.CREATED),
@@ -117,7 +113,6 @@ __decorate([
 ], ProductsController.prototype, "deleteProduct", null);
 __decorate([
     (0, common_1.Post)(':id/upload'),
-    (0, swagger_1.ApiOperation)({ summary: 'Upload product image' }),
     (0, swagger_1.ApiConsumes)('multipart/form-data'),
     (0, swagger_1.ApiBody)({
         schema: {

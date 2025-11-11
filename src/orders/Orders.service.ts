@@ -1,7 +1,7 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/createOrderDto';
-import { OrderItems, OrderResponseDto } from './dto/OrderResponseDto';
+import { OrderResponseDto } from './dto/OrderResponseDto';
 import { ApiResponseDto } from '../common/dto/response/ApiResponseDto';
 
 
@@ -15,28 +15,37 @@ export class OrdersService {
     ): Promise<ApiResponseDto<OrderResponseDto>> {
         return this.prisma.$transaction(async (tx) => {
             let totalPrice = 0;
-            const orderItemsData: OrderItems[] = [];
 
-            for (const item of dto.items) {
-                const product = await tx.product.findUnique({ where: { id: item.productId } });
-                if (!product) throw new NotFoundException(`Product not found: ${item.productId}`);
+            // Prepare order items data
+            const orderItemsData = await Promise.all(
+                dto.items.map(async (item) => {
+                    const product = await tx.product.findUnique({ where: { id: item.productId } });
 
-                if (product.stock < item.quantity)
-                    throw new BadRequestException(`Insufficient stock for product: ${product.name}`);
+                    if (!product) {
+                        throw new NotFoundException(`Product not found: ${item.productId}`);
+                    }
 
-                totalPrice += product.price * item.quantity;
+                    if (product.stock < item.quantity) {
+                        throw new BadRequestException(`Insufficient stock for product: ${product.name}`);
+                    }
 
-                orderItemsData.push({
-                    productId: product.id,
-                    quantity: item.quantity,
-                });
+                    // Calculate total price
+                    totalPrice += product.price * item.quantity;
 
-                await tx.product.update({
-                    where: { id: product.id },
-                    data: { stock: product.stock - item.quantity },
-                });
-            }
+                    // Deduct stock
+                    await tx.product.update({
+                        where: { id: product.id },
+                        data: { stock: product.stock - item.quantity },
+                    });
 
+                    return {
+                        productId: product.id,
+                        quantity: item.quantity,
+                    };
+                })
+            );
+
+            // Create order with items
             const order = await tx.order.create({
                 data: {
                     userId,
@@ -44,10 +53,7 @@ export class OrdersService {
                     description: dto.description || 'No description',
                     status: 'pending',
                     orderItems: {
-                        create: orderItemsData.map((item) => ({
-                            productId: item.productId,
-                            quantity: item.quantity,
-                        })),
+                        create: orderItemsData,
                     },
                 },
                 include: {
@@ -55,23 +61,27 @@ export class OrdersService {
                 },
             });
 
+            // Map order to response DTO
+            const orderResponse = new OrderResponseDto({
+                id: order.id,
+                userId: order.userId,
+                totalAmount: order.totalPrice,
+                status: order.status,
+                items: order.orderItems.map((i) => ({
+                    productId: i.productId,
+                    quantity: i.quantity,
+                })),
+                createdAt: order.createdAt,
+            });
+
             return new ApiResponseDto<OrderResponseDto>(
                 true,
                 'Order placed successfully',
-                new OrderResponseDto({
-                    id: order.id,
-                    userId: order.userId,
-                    totalAmount: order.totalPrice,
-                    status: order.status,
-                    items: order.orderItems.map((i) => ({
-                        productId: i.productId,
-                        quantity: i.quantity,
-                    })),
-                    createdAt: order.createdAt,
-                })
+                orderResponse,
             );
         });
     }
+
 
 
     async getUserOrders(userId: string): Promise<ApiResponseDto<any[]>> {

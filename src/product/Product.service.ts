@@ -16,6 +16,7 @@ export class ProductsService {
 
         const skip = (page - 1) * limit;
 
+        // Fetch total count and paginated products concurrently
         const [totalProducts, products] = await Promise.all([
             this.prisma.product.count(),
             this.prisma.product.findMany({
@@ -36,7 +37,8 @@ export class ProductsService {
 
         const totalPages = Math.ceil(totalProducts / limit);
 
-        const productObject: ProductListDto = {
+        // Map products to DTO
+        const productList: ProductListDto = {
             currentPage: page,
             pageSize: limit,
             totalPages,
@@ -51,7 +53,7 @@ export class ProductsService {
         return new ApiResponseDto<ProductListDto>(
             true,
             'Products fetched successfully',
-            productObject,
+            productList,
         );
     }
 

@@ -22,7 +22,7 @@ export class ProductsController {
 
     @Get()
     @HttpCode(HttpStatus.OK)
-    async getAllProducts(
+    async getProducts(
         @Query('page') page?: string,
         @Query('limit') limit?: string,
         @Query('search') search?: string,
@@ -31,29 +31,24 @@ export class ProductsController {
         const cacheKey = `products_page:${page}_limit:${limit}_search:${search}`;
 
         // Check if the response exists in cache
-        const cached = await this.cacheManager.get(cacheKey);
-        if (cached) {
-            // Return cached response if available
-            return cached;
+        const cachedResult = await this.cacheManager.get(cacheKey);
+        if (cachedResult) {
+            // Return cachedResult  response if available
+            return cachedResult;
         }
 
         const pageNum = page ? parseInt(page, 10) : 1;
         const limitNum = limit ? parseInt(limit, 10) : 10;
 
-        let result;
+        // Fetch products (with or without search)
+        const products = search
+            ? await this.productsService.searchProduct(pageNum, limitNum, search)
+            : await this.productsService.getProducts(pageNum, limitNum);
 
-        if (search) {
-            // If a search query is provided, fetch filtered products
-            result = await this.productsService.searchProduct(pageNum, limitNum, search);
-        } else {
-            // Otherwise, fetch all products with pagination
-            result = await this.productsService.getProducts(pageNum, limitNum);
-        }
+        // Cache the result
+        await this.cacheManager.set(cacheKey, products);
 
-        //cache the result for future requests (e.g., 60 seconds TTL)
-        await this.cacheManager.set(cacheKey, result);
-
-        return result
+        return products;
     }
 
     @Post()
@@ -93,7 +88,6 @@ export class ProductsController {
     }
 
     @Post(':id/upload')
-    @ApiOperation({ summary: 'Upload product image' })
     @ApiConsumes('multipart/form-data')
     @ApiBody({
         schema: {

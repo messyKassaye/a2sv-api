@@ -40,7 +40,7 @@ let ProductsService = class ProductsService {
             }),
         ]);
         const totalPages = Math.ceil(totalProducts / limit);
-        const productObject = {
+        const productList = {
             currentPage: page,
             pageSize: limit,
             totalPages,
@@ -51,7 +51,7 @@ let ProductsService = class ProductsService {
                 userId: product.userId ?? undefined
             })),
         };
-        return new ApiResponseDto_1.ApiResponseDto(true, 'Products fetched successfully', productObject);
+        return new ApiResponseDto_1.ApiResponseDto(true, 'Products fetched successfully', productList);
     }
     async getProductById(id) {
         const product = await this.prisma.product.findUnique({

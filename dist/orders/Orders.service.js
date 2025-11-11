@@ -22,23 +22,24 @@ let OrdersService = class OrdersService {
     async createOrder(dto, userId) {
         return this.prisma.$transaction(async (tx) => {
             let totalPrice = 0;
-            const orderItemsData = [];
-            for (const item of dto.items) {
+            const orderItemsData = await Promise.all(dto.items.map(async (item) => {
                 const product = await tx.product.findUnique({ where: { id: item.productId } });
-                if (!product)
+                if (!product) {
                     throw new common_1.NotFoundException(`Product not found: ${item.productId}`);
-                if (product.stock < item.quantity)
+                }
+                if (product.stock < item.quantity) {
                     throw new common_1.BadRequestException(`Insufficient stock for product: ${product.name}`);
+                }
                 totalPrice += product.price * item.quantity;
-                orderItemsData.push({
-                    productId: product.id,
-                    quantity: item.quantity,
-                });
                 await tx.product.update({
                     where: { id: product.id },
                     data: { stock: product.stock - item.quantity },
                 });
-            }
+                return {
+                    productId: product.id,
+                    quantity: item.quantity,
+                };
+            }));
             const order = await tx.order.create({
                 data: {
                     userId,
@@ -46,17 +47,14 @@ let OrdersService = class OrdersService {
                     description: dto.description || 'No description',
                     status: 'pending',
                     orderItems: {
-                        create: orderItemsData.map((item) => ({
-                            productId: item.productId,
-                            quantity: item.quantity,
-                        })),
+                        create: orderItemsData,
                     },
                 },
                 include: {
                     orderItems: true,
                 },
             });
-            return new ApiResponseDto_1.ApiResponseDto(true, 'Order placed successfully', new OrderResponseDto_1.OrderResponseDto({
+            const orderResponse = new OrderResponseDto_1.OrderResponseDto({
                 id: order.id,
                 userId: order.userId,
                 totalAmount: order.totalPrice,
@@ -66,7 +64,8 @@ let OrdersService = class OrdersService {
                     quantity: i.quantity,
                 })),
                 createdAt: order.createdAt,
-            }));
+            });
+            return new ApiResponseDto_1.ApiResponseDto(true, 'Order placed successfully', orderResponse);
         });
     }
     async getUserOrders(userId) {
