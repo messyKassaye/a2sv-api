@@ -12,36 +12,50 @@ import { basename } from 'path';
 export class ProductsService {
     constructor(private prisma: PrismaService) { }
 
-    async getProducts(page = 1, limit = 10): Promise<ApiResponseDto<ProductListDto>> {
+    async getProducts(options: {
+        page: number;
+        limit: number;
+        search?: string;
+        category?: string;
+        minPrice?: number;
+        maxPrice?: number;
+        sortBy?: string;
+        order?: 'asc' | 'desc';
+    }): Promise<ApiResponseDto<ProductListDto>> {
+        const { page, limit, search, category, minPrice, maxPrice, sortBy, order } = options;
 
         const skip = (page - 1) * limit;
 
-        // Fetch total count and paginated products concurrently
-        const [totalProducts, products] = await Promise.all([
-            this.prisma.product.count(),
-            this.prisma.product.findMany({
-                skip,
-                take: limit,
-                orderBy: { createdAt: 'desc' },
-                select: {
-                    id: true,
-                    name: true,
-                    price: true,
-                    stock: true,
-                    category: true,
-                    userId: true,
-                    images: true
-                },
-            }),
-        ]);
+        const where: any = {};
 
-        const totalPages = Math.ceil(totalProducts / limit);
+        if (search) {
+            where.name = { contains: search, mode: 'insensitive' };
+        }
+
+        if (category) {
+            where.category = category;
+        }
+
+        if (minPrice !== undefined || maxPrice !== undefined) {
+            where.price = {};
+            if (minPrice !== undefined) where.price.gte = minPrice;
+            if (maxPrice !== undefined) where.price.lte = maxPrice;
+        }
+
+        const products = await this.prisma.product.findMany({
+            where,
+            orderBy: sortBy ? { [sortBy]: order || 'asc' } : { createdAt: 'desc' },
+            skip: (page - 1) * limit,
+            take: limit,
+        });
+
+        const totalProducts = await this.prisma.product.count({ where });
 
         // Map products to DTO
         const productList: ProductListDto = {
             currentPage: page,
             pageSize: limit,
-            totalPages,
+            totalPages: totalProducts,
             totalProducts,
             products: products.map(product => new ProductDto({
                 ...product,
@@ -49,7 +63,6 @@ export class ProductsService {
                 userId: product.userId ?? undefined
             })),
         };
-
         return new ApiResponseDto<ProductListDto>(
             true,
             'Products fetched successfully',

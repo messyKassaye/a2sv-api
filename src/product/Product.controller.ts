@@ -26,6 +26,11 @@ export class ProductsController {
         @Query('page') page?: string,
         @Query('limit') limit?: string,
         @Query('search') search?: string,
+        @Query('category') category?: string,
+        @Query('minPrice') minPrice?: string,
+        @Query('maxPrice') maxPrice?: string,
+        @Query('sortBy') sortBy?: string,  // e.g., "price" or "name"
+        @Query('order') order?: string,    // "asc" or "desc"
 
     ) {
         const cacheKey = `products_page:${page}_limit:${limit}_search:${search}`;
@@ -41,9 +46,16 @@ export class ProductsController {
         const limitNum = limit ? parseInt(limit, 10) : 10;
 
         // Fetch products (with or without search)
-        const products = search
-            ? await this.productsService.searchProduct(pageNum, limitNum, search)
-            : await this.productsService.getProducts(pageNum, limitNum);
+        const products = this.productsService.getProducts({
+            page: pageNum,
+            limit: limitNum,
+            search,
+            category,
+            minPrice: minPrice ? parseFloat(minPrice) : undefined,
+            maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
+            sortBy,
+            order: 'asc',
+        });
 
         // Cache the result
         await this.cacheManager.set(cacheKey, products);
