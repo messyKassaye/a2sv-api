@@ -10,6 +10,8 @@ import { ProductModule } from './product/product.module';
 import { OrdersModule } from './orders/orders.module';
 import databaseConfig from './config/database.config';
 import jwtConfig from './config/jwt.config';
+import { ThrottlerModule } from '@nestjs/throttler';
+
 
 
 
@@ -19,6 +21,12 @@ import jwtConfig from './config/jwt.config';
       isGlobal: true,
       load: [databaseConfig, jwtConfig]
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60, // time window in seconds
+        limit: 5, // default per IP (if no @Throttle decorator applied)
+      },
+    ]),
     AuthModule,
     PrismaModule,
     UserModule,

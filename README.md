@@ -1,98 +1,236 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# E-Commerce Backend API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This is a **NestJS backend** for an e-commerce platform. It provides user authentication, product management, order management, product image uploads, caching, and rate-limiting features.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## Table of Contents
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- [Technologies](#technologies)  
+- [Setup](#setup)  
+- [Environment Variables](#environment-variables)  
+- [Running the Project](#running-the-project)  
+- [API Endpoints](#api-endpoints)  
+- [Features](#features)  
+- [Testing](#testing)  
+- [Folder Structure](#folder-structure)  
+- [Contact](#contact)
 
-## Project setup
+---
 
-```bash
-$ npm install
-```
+## Technologies
 
-## Compile and run the project
+- NestJS  
+- TypeScript  
+- Prisma ORM  
+- PostgreSQL (or your database)  
+- Redis (for caching)  
+- Swagger (API documentation)  
 
-```bash
-# development
-$ npm run start
+---
 
-# watch mode
-$ npm run start:dev
 
-# production mode
-$ npm run start:prod
-```
 
-## Run tests
+## Setup
+
+1. Clone the repository:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+git clone https://github.com/messyKassaye/a2sv-api
+cd a2sv-api
 ```
 
-## Deployment
+## Environment Variables
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+Create a `.env` file in the root directory or rename `.env.example` into `.env`:
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+```env
+NODE_ENV=development
+BASE_URL=http://localhost:5000
+PORT=5000
+DB_HOST=localhost
+DB_USER=postgres
+DB_PASS=123456789
+DB_PORT=5432
+DB_NAME=a2sv_assessment_db
+DATABASE_URL="postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=public"
+
+ORIGINS=http://localhost:5173,http://localhost:3000
+JWT_SECRET=de901d20f770b59f3a598bc53ef73c556c1a320f3be1397726c4713bd1de4bc5
+JWT_EXPIRES_IN=15m
+
+REDIS_HOST="localhost"
+REDIS_PORT=6379
+REDIS_TTL=60
+```
+
+2. Install dependencies:
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm install
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+3. Initialize Prisma:
 
-## Resources
+```bash
+npx prisma generate
+npm run migrate
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+4. (Optional) Start Redis if using caching or use docker:
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```bash
+redis-server
+```
 
-## Support
+---
+## Run seeder to create ADMIN
+### Use the following command to run the database seeder and create the ADMIN
+```bash
+npm run seed
+```
+---
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## Running the Project
 
-## Stay in touch
+```bash
+npm run start:dev
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Swagger API documentation available at:  
+```
+http://localhost:5000/
+```
 
-## License
+---
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## API Endpoints
+
+### Authentication
+
+- **POST /auth/register** – User register  
+Example Request Body:
+
+```json
+{
+  "username": "john123",
+  "email": "john@example.com",
+  "password": "Password@123"
+}
+```
+
+- **POST /auth/login** – User login, returns JWT  
+Example Request Body:
+
+```json
+{
+  "email": "john@example.com",
+  "password": "Password@123"
+}
+```
+
+---
+
+### Products
+
+- **GET /products** – List products with pagination & optional search  
+- **GET /products/:id** – Get product details  
+- **POST /products** – Create a product (Admin only)  
+Example Request Body:
+
+```json
+{
+  "name": "Laptop",
+  "description": "Powerful gaming laptop",
+  "price": 1200,
+  "stock": 5,
+  "category": "Electronics"
+}
+```
+
+- **PUT /products/:id** – Update a product (Admin only)  
+- **DELETE /products/:id** – Delete a product (Admin only)  
+- **POST /products/:id/upload** – Upload product image (Admin only)  
+
+---
+
+### Orders
+
+- **POST /orders** – Place a new order (Authenticated user)  
+Example Request Body:
+
+```json
+[
+  { "productId": "uuid-product-1", "quantity": 2 },
+  { "productId": "uuid-product-2", "quantity": 1 }
+]
+```
+
+- **GET /orders** – View order history (Authenticated user)  
+
+---
+
+## Features
+
+### 1. Authentication
+
+- Passwords are hashed using **bcrypt**  
+- JWT-based authentication  
+- Input validation for email, password, and username  
+
+### 2. Product Management
+
+- CRUD operations for products  
+- Validation on fields (name, description, price, stock, category)  
+- Admin-only endpoints for creating, updating, deleting products  
+- Swagger documentation for API endpoints  
+
+### 3. Product Image Uploads
+
+- Upload single or multiple product images  
+- Stored locally (`uploads/`) or on **Cloudinary**  
+- Image URLs saved in database with base URL  
+- Works on Windows and Linux  
+
+### 4. Caching
+
+- Redis used to cache product listings  
+- Cache keys are based on page, limit, and search query  
+- Cached responses returned if available  
+
+### 5. Rate Limiting
+
+- Prevent abuse and brute-force attacks  
+- Configured with `@nestjs/throttler`  
+- Global: 5 requests per minute per IP  
+- Login endpoints: stricter limit (5 requests/min)  
+
+### 6. Orders
+
+- Place orders with multiple products  
+- Stock verification and transaction handling (rollback on failure)  
+- Total price calculated server-side  
+- Order history restricted to authenticated user  
+
+### 7. Testing
+
+- Unit tests for services using mocked Prisma  
+- Tests cover product creation, update, deletion, and orders  
+
+---
+
+## Running Tests
+
+```bash
+npm run test
+```
+
+## Notes
+
+- Ensure `uploads/` folder exists for local image storage  
+- Redis server must be running for caching  
+- Swagger docs provide full schema and request/response examples  
+
+---
+
+

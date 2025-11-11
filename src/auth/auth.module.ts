@@ -6,6 +6,8 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UserModule } from 'src/user/user.module';
 import { JwtStrategy } from './stategies/jwt.strategy';
+import { APP_GUARD } from '@nestjs/core';
+import { CustomThrottlerGuard } from './guards/throttler.guard';
 dotenv.config();
 
 const expiresIn: string = process.env.JWT_EXPIRES_IN ?? '15m';
@@ -19,7 +21,14 @@ const expiresIn: string = process.env.JWT_EXPIRES_IN ?? '15m';
             signOptions: { expiresIn: expiresIn as unknown as import('jsonwebtoken').SignOptions['expiresIn'] },
         }),
     ],
-    providers: [AuthService, JwtStrategy],
+    providers: [
+        AuthService,
+        JwtStrategy,
+        {
+            provide: APP_GUARD,
+            useClass: CustomThrottlerGuard, // only applies to this module
+        },
+    ],
     controllers: [AuthController],
     exports: [AuthService],
 })

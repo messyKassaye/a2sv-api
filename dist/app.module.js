@@ -22,6 +22,7 @@ const product_module_1 = require("./product/product.module");
 const orders_module_1 = require("./orders/orders.module");
 const database_config_1 = __importDefault(require("./config/database.config"));
 const jwt_config_1 = __importDefault(require("./config/jwt.config"));
+const throttler_1 = require("@nestjs/throttler");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -32,6 +33,12 @@ exports.AppModule = AppModule = __decorate([
                 isGlobal: true,
                 load: [database_config_1.default, jwt_config_1.default]
             }),
+            throttler_1.ThrottlerModule.forRoot([
+                {
+                    ttl: 60,
+                    limit: 5,
+                },
+            ]),
             auth_module_1.AuthModule,
             prisma_module_1.PrismaModule,
             user_module_1.UserModule,
