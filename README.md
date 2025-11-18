@@ -36,7 +36,7 @@ This is a **NestJS backend** for an e-commerce platform. It provides user authen
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/messyKassaye/a2sv-api && cd a2sv-api
+git clone https://github.com/messyKassaye/assai-electronics-api && cd assai-electronics-api
 ```
 
 ## Environment Variables
