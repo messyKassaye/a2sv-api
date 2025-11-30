@@ -23,6 +23,9 @@ const orders_module_1 = require("./orders/orders.module");
 const database_config_1 = __importDefault(require("./config/database.config"));
 const jwt_config_1 = __importDefault(require("./config/jwt.config"));
 const throttler_1 = require("@nestjs/throttler");
+const dashboard_module_1 = require("./dashboard/dashboard.module");
+const serve_static_1 = require("@nestjs/serve-static");
+const path_1 = require("path");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -39,12 +42,17 @@ exports.AppModule = AppModule = __decorate([
                     limit: 5,
                 },
             ]),
+            serve_static_1.ServeStaticModule.forRoot({
+                rootPath: (0, path_1.join)(__dirname, '..', 'uploads'),
+                serveRoot: '/uploads',
+            }),
             auth_module_1.AuthModule,
             prisma_module_1.PrismaModule,
             user_module_1.UserModule,
             common_module_1.CommonModule,
             product_module_1.ProductModule,
-            orders_module_1.OrdersModule
+            orders_module_1.OrdersModule,
+            dashboard_module_1.DashboardModule
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

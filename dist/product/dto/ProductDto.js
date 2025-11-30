@@ -4,6 +4,8 @@ exports.ProductDto = void 0;
 class ProductDto {
     id;
     name;
+    model;
+    display;
     description;
     price;
     stock;

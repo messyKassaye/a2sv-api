@@ -13,9 +13,11 @@ exports.CreateProductDto = void 0;
 const class_validator_1 = require("class-validator");
 class CreateProductDto {
     name;
-    description;
     price;
     stock;
+    model;
+    display;
+    description;
     category;
 }
 exports.CreateProductDto = CreateProductDto;
@@ -25,11 +27,6 @@ __decorate([
     __metadata("design:type", String)
 ], CreateProductDto.prototype, "name", void 0);
 __decorate([
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.Length)(10, 1000, { message: 'Description must be at least 10 characters' }),
-    __metadata("design:type", String)
-], CreateProductDto.prototype, "description", void 0);
-__decorate([
     (0, class_validator_1.IsPositive)({ message: 'Price must be a positive number' }),
     __metadata("design:type", Number)
 ], CreateProductDto.prototype, "price", void 0);
@@ -37,6 +34,18 @@ __decorate([
     (0, class_validator_1.Min)(0, { message: 'Stock must be a non-negative integer' }),
     __metadata("design:type", Number)
 ], CreateProductDto.prototype, "stock", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateProductDto.prototype, "model", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateProductDto.prototype, "display", void 0);
+__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], CreateProductDto.prototype, "description", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)

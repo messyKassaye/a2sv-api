@@ -59,6 +59,8 @@ export class ProductsService {
             totalProducts,
             products: products.map(product => new ProductDto({
                 ...product,
+                model: product.model ?? undefined,
+                display: product.display ?? undefined,
                 category: product.category ?? undefined,
                 userId: product.userId ?? undefined
             })),
@@ -82,6 +84,7 @@ export class ProductsService {
                 price: true,
                 stock: true,
                 category: true,
+                images: true
             },
         });
 
@@ -166,6 +169,8 @@ export class ProductsService {
             'Product created successfully',
             new ProductDto({
                 ...product,
+                model: dto.model ?? undefined,
+                display: dto.display ?? undefined,
                 category: product.category ?? undefined,
                 userId: product.userId ?? undefined,
             }),
@@ -197,6 +202,8 @@ export class ProductsService {
             'Product updated successfully',
             new ProductDto({
                 ...updated,
+                model: updated.model ?? undefined,
+                display: updated.display ?? undefined,
                 category: updated.category ?? undefined,
                 userId: updated.userId ?? undefined,
             }),
@@ -224,28 +231,36 @@ export class ProductsService {
         }
     }
 
-    async addProductImage(productId: string, filePath: string): Promise<ApiResponseDto<ProductDto>> {
+    async addProductImages(productId: string, filePaths: string[]): Promise<ApiResponseDto<ProductDto>> {
         const baseUrl = process.env.BASE_URL || 'http://localhost:5000';
-        const fileName = basename(filePath).replace(/\\/g, '/'); // ensures forward slashes
-        const imageUrl = `${baseUrl}/uploads/${fileName}`;
 
+        // Convert each file path to a public URL
+        const imageUrls = filePaths.map(filePath => {
+            const fileName = basename(filePath).replace(/\\/g, '/');
+            return `${baseUrl}/uploads/${fileName}`;
+        });
 
+        // Append all URLs at once
         const product = await this.prisma.product.update({
             where: { id: productId },
             data: {
-                images: { push: imageUrl }, // append image URL
+                images: { push: imageUrls },
             },
         });
+
         return {
             success: true,
-            message: 'Image uploaded',
+            message: 'Images uploaded',
             object: new ProductDto({
                 ...product,
+                model: product.model ?? undefined,
+                display: product.display ?? undefined,
                 category: product.category ?? undefined,
                 userId: product.userId ?? undefined,
             }),
             errors: null
         };
     }
+
 
 }

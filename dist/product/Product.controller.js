@@ -30,7 +30,7 @@ let ProductsController = class ProductsController {
         this.productsService = productsService;
         this.cacheManager = cacheManager;
     }
-    async getProducts(page, limit, search) {
+    async getProducts(page, limit, search, category, minPrice, maxPrice, sortBy, order) {
         const cacheKey = `products_page:${page}_limit:${limit}_search:${search}`;
         const cachedResult = await this.cacheManager.get(cacheKey);
         if (cachedResult) {
@@ -38,14 +38,21 @@ let ProductsController = class ProductsController {
         }
         const pageNum = page ? parseInt(page, 10) : 1;
         const limitNum = limit ? parseInt(limit, 10) : 10;
-        const products = search
-            ? await this.productsService.searchProduct(pageNum, limitNum, search)
-            : await this.productsService.getProducts(pageNum, limitNum);
+        const products = this.productsService.getProducts({
+            page: pageNum,
+            limit: limitNum,
+            search,
+            category,
+            minPrice: minPrice ? parseFloat(minPrice) : undefined,
+            maxPrice: maxPrice ? parseFloat(maxPrice) : undefined,
+            sortBy,
+            order: 'asc',
+        });
         await this.cacheManager.set(cacheKey, products);
         return products;
     }
     async create(dto, req) {
-        return this.productsService.createProduct(dto, req.user.userId);
+        return this.productsService.createProduct(dto, '853e29ae-38dd-468e-adf4-064a560d8737');
     }
     async getProductById(id) {
         return this.productsService.getProductById(id);
@@ -56,8 +63,8 @@ let ProductsController = class ProductsController {
     async deleteProduct(id) {
         return await this.productsService.deleteProduct(id);
     }
-    async uploadProductImage(id, file) {
-        return this.productsService.addProductImage(id, file.path);
+    async uploadProductImage(id, files) {
+        return this.productsService.addProductImages(id, files.map(f => f.path));
     }
 };
 exports.ProductsController = ProductsController;
@@ -67,15 +74,18 @@ __decorate([
     __param(0, (0, common_1.Query)('page')),
     __param(1, (0, common_1.Query)('limit')),
     __param(2, (0, common_1.Query)('search')),
+    __param(3, (0, common_1.Query)('category')),
+    __param(4, (0, common_1.Query)('minPrice')),
+    __param(5, (0, common_1.Query)('maxPrice')),
+    __param(6, (0, common_1.Query)('sortBy')),
+    __param(7, (0, common_1.Query)('order')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:paramtypes", [String, String, String, String, String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], ProductsController.prototype, "getProducts", null);
 __decorate([
     (0, common_1.Post)(),
     (0, common_1.HttpCode)(common_1.HttpStatus.CREATED),
-    (0, common_1.UseGuards)(jwtauth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorators_1.Roles)('ADMIN'),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -94,7 +104,6 @@ __decorate([
     (0, common_1.Put)(':id'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, common_1.UseGuards)(jwtauth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    (0, roles_decorators_1.Roles)('ADMIN'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -122,12 +131,11 @@ __decorate([
             },
         },
     }),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
-    (0, roles_decorators_1.Roles)('ADMIN'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FilesInterceptor)('files')),
     __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.UploadedFile)()),
+    __param(1, (0, common_1.UploadedFiles)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [String, Array]),
     __metadata("design:returntype", Promise)
 ], ProductsController.prototype, "uploadProductImage", null);
 exports.ProductsController = ProductsController = __decorate([

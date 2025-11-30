@@ -20,33 +20,39 @@ let ProductsService = class ProductsService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    async getProducts(page = 1, limit = 10) {
+    async getProducts(options) {
+        const { page, limit, search, category, minPrice, maxPrice, sortBy, order } = options;
         const skip = (page - 1) * limit;
-        const [totalProducts, products] = await Promise.all([
-            this.prisma.product.count(),
-            this.prisma.product.findMany({
-                skip,
-                take: limit,
-                orderBy: { createdAt: 'desc' },
-                select: {
-                    id: true,
-                    name: true,
-                    price: true,
-                    stock: true,
-                    category: true,
-                    userId: true,
-                    images: true
-                },
-            }),
-        ]);
-        const totalPages = Math.ceil(totalProducts / limit);
+        const where = {};
+        if (search) {
+            where.name = { contains: search, mode: 'insensitive' };
+        }
+        if (category) {
+            where.category = category;
+        }
+        if (minPrice !== undefined || maxPrice !== undefined) {
+            where.price = {};
+            if (minPrice !== undefined)
+                where.price.gte = minPrice;
+            if (maxPrice !== undefined)
+                where.price.lte = maxPrice;
+        }
+        const products = await this.prisma.product.findMany({
+            where,
+            orderBy: sortBy ? { [sortBy]: order || 'asc' } : { createdAt: 'desc' },
+            skip: (page - 1) * limit,
+            take: limit,
+        });
+        const totalProducts = await this.prisma.product.count({ where });
         const productList = {
             currentPage: page,
             pageSize: limit,
-            totalPages,
+            totalPages: totalProducts,
             totalProducts,
             products: products.map(product => new ProductDto_1.ProductDto({
                 ...product,
+                model: product.model ?? undefined,
+                display: product.display ?? undefined,
                 category: product.category ?? undefined,
                 userId: product.userId ?? undefined
             })),
@@ -63,6 +69,7 @@ let ProductsService = class ProductsService {
                 price: true,
                 stock: true,
                 category: true,
+                images: true
             },
         });
         if (!product) {
@@ -130,6 +137,8 @@ let ProductsService = class ProductsService {
         });
         return new ApiResponseDto_1.ApiResponseDto(true, 'Product created successfully', new ProductDto_1.ProductDto({
             ...product,
+            model: dto.model ?? undefined,
+            display: dto.display ?? undefined,
             category: product.category ?? undefined,
             userId: product.userId ?? undefined,
         }));
@@ -151,6 +160,8 @@ let ProductsService = class ProductsService {
         });
         return new ApiResponseDto_1.ApiResponseDto(true, 'Product updated successfully', new ProductDto_1.ProductDto({
             ...updated,
+            model: updated.model ?? undefined,
+            display: updated.display ?? undefined,
             category: updated.category ?? undefined,
             userId: updated.userId ?? undefined,
         }));
@@ -172,21 +183,25 @@ let ProductsService = class ProductsService {
             errors: null
         };
     }
-    async addProductImage(productId, filePath) {
+    async addProductImages(productId, filePaths) {
         const baseUrl = process.env.BASE_URL || 'http://localhost:5000';
-        const fileName = (0, path_1.basename)(filePath).replace(/\\/g, '/');
-        const imageUrl = `${baseUrl}/uploads/${fileName}`;
+        const imageUrls = filePaths.map(filePath => {
+            const fileName = (0, path_1.basename)(filePath).replace(/\\/g, '/');
+            return `${baseUrl}/uploads/${fileName}`;
+        });
         const product = await this.prisma.product.update({
             where: { id: productId },
             data: {
-                images: { push: imageUrl },
+                images: { push: imageUrls },
             },
         });
         return {
             success: true,
-            message: 'Image uploaded',
+            message: 'Images uploaded',
             object: new ProductDto_1.ProductDto({
                 ...product,
+                model: product.model ?? undefined,
+                display: product.display ?? undefined,
                 category: product.category ?? undefined,
                 userId: product.userId ?? undefined,
             }),

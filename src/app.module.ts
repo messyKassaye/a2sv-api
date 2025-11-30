@@ -11,6 +11,9 @@ import { OrdersModule } from './orders/orders.module';
 import databaseConfig from './config/database.config';
 import jwtConfig from './config/jwt.config';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { DashboardModule } from './dashboard/dashboard.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 
 
@@ -27,12 +30,17 @@ import { ThrottlerModule } from '@nestjs/throttler';
         limit: 5, // default per IP (if no @Throttle decorator applied)
       },
     ]),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'), // folder with your images
+      serveRoot: '/uploads', // URL path
+    }),
     AuthModule,
     PrismaModule,
     UserModule,
     CommonModule,
     ProductModule,
-    OrdersModule
+    OrdersModule,
+    DashboardModule
   ],
   controllers: [AppController],
   providers: [AppService],
